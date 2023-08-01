@@ -153,12 +153,16 @@ class Model
        return $this->query($sql)->get();
     }
 
-    public function find($id){
+    public function find($id,$id_table = null){
         # code...
         //'SELECT * FROM contacts'
        // return $this->table;
+       $ids ='id';
+       if($id_table !== null){
+        $ids = $id_table;
+       }
 
-        $sql = "SELECT * FROM {$this->table} WHERE id = ?";
+        $sql = "SELECT * FROM {$this->table} WHERE {$ids} = ?";
        return $this->query($sql,[$id],'i')->first();
     }
     
@@ -189,7 +193,7 @@ class Model
         return $this;
     }
 
-    public function create ($data)
+    public function create ($data,$id = null)
     {
         # code...
         //INSERT INTO contacts (name,email,phone) VALUES  (? ,? ,? )
@@ -197,28 +201,35 @@ class Model
         $colums =  implode(',',$colums);
         
         $values = array_values($data);
-
+        //  var_dump($values);
         $sql = "INSERT INTO {$this->table} ({$colums}) VALUES  (".str_repeat('?,',count($values) - 1) . " ?)";
+        // var_dump($sql);
        
         // $sql = "INSERT INTO {$this->table} ({$colums}) VALUES  ({$values})";
         $this->query($sql,$values);
 
         $insert_id =  $this->connection->insert_id;
         
-        return $this->find($insert_id); 
+        return $this->find($insert_id,$id); 
     }
 
-    public function update ($id,$data)
+    public function update ($id,$data,$id_table = null)
     {
         # code...
         //UPDATE contacts SET name =? ,email =?,phone=? WHERE id = 1
+        $ids ='id';
+        if($id_table !== null){
+         $ids = $id_table;
+        }
+
         $fields = [];
+        var_dump($data);
         foreach ($data as $key => $value) {
 
             $fields[] = "{$key} = ?";   
         }
         $fields = implode(', ', $fields) ;
-        $sql = "UPDATE {$this->table} SET {$fields}  WHERE id = ?";
+        $sql = "UPDATE {$this->table} SET {$fields}  WHERE {$ids} = ?";
         $values = array_values($data); 
         $values [] = $id;
         // return $values;
@@ -226,15 +237,19 @@ class Model
 
        // $insert_id =  $this->connection->insert_id;
         
-        return $this->find($id); 
+        return $this->find($id,$ids); 
     }
 
-    public function delete ($id)
+    public function delete ($id,$id_table = null)
     {
         # code...
         //DELETE FROM  CONTACTS WHERE id = 1
+        $ids ='id';
+        if($id_table !== null){
+         $ids = $id_table;
+        }
        
-        $sql = "DELETE FROM {$this->table}  WHERE id = ?";
+        $sql = "DELETE FROM {$this->table}  WHERE {$ids} = ?";
 
         $this->query($sql,[$id],'i');
 
